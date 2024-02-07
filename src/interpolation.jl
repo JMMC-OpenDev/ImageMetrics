@@ -1,7 +1,8 @@
 module Interpolation
 
-export interpolate, interpolate!
+export interpolate, interpolate!, resample
 
+using TypeUtils, Unitless
 import Base: axes1
 
 """
@@ -166,6 +167,84 @@ function interpolate!(B::AbstractArray{<:Any,N},
     end
     =#
     return B
+end
+
+"""
+    resample(A, dims...; kwds...) -> B
+
+resamples array `A` to size `dims...` as if:
+
+    B[i] ≈ A[(i - δ)/ρ]
+
+with `δ` a translation and `ρ` a magnification factor.
+
+Keywords are:
+
+* `magnification = ρ` is the ratio of the pixel size of `B` divided by the
+  pixel size of `A` (default 1).
+
+* `translation = δ` is a tuple of translation Cartesian coordinates (no
+  translation by default) for the input array `A`.
+
+The geometrical center of `A`, shifted by `δ`, is mapped to the geometrical
+center of `B`
+
+"""
+resample(A::AbstractArray, dims::Integer...; kwds...) =
+    resample(A, dims; kwds...)
+resample(A::AbstractArray, dims::Tuple{Vararg{Integer}}; kwds...) =
+    resample(A, as(Dims, dims); kwds...)
+function resample(A::AbstractArray{<:Any,N}, dims::Dims{N};
+                  magnification::Real = 1,
+                  translation::NTuple{N,Real} = ntuple(Returns(0), Val(N))) where {N}
+    # FIXME: Base.has_offset_axes(A) && throw(error("array must have 1-based indices"))
+    T = floating_point_type(eltype(A))
+    ρ = as(T, magnification)
+    J = axes(A)
+    x = ntuple(d -> resampling_coordinates(
+        T, Base.OneTo(dims[d]), J[d], as(T, translation[d]), ρ), Val(N))
+    return interpolate(A, x...)
+end
+
+"""
+    resampling_coordinates(T=Float64, I, J, δ, ρ) -> J′
+
+yields a range `J′` of fractional indices such that (1-D) interpolation of a
+vector `A` writes:
+
+    B ≈ A[J′]
+
+with `I` the index range of `B`, `J` the index range of `A`, `δ` a translation,
+and `ρ` a magnification factor. To explain the roles of `δ` and `ρ`, the
+interpolation is equivalent to:
+
+    B[i] ≈ A[(i - δ)/ρ]       (∀ i ∈ I)
+
+Optional argument `T` is to specify the floating-point type of the fractioanl
+indices.
+
+"""
+function resampling_coordinates(::Type{T},
+                                I::AbstractUnitRange{Int},
+                                J::AbstractUnitRange{Int},
+                                δ::Real,
+                                ρ::Real) where {T<:AbstractFloat}
+    # Let `i0` be the central index in `I`:
+    #
+    i0 = as(T, first(I) + last(I))/2
+    #
+    # and `j0` be the central index in `J`:
+    #
+    j0 = as(T, first(J) + last(J))/2
+    #
+    # Then, the fractional index is:
+    #
+    #     j = j0 + (i - i0 - δ)/ρ
+    #       = i/ρ + (j0 - (i0 + δ)/ρ)
+    #
+    ρ = as(T, ρ)
+    δ = as(T, δ)
+    return (I ./ ρ) .+ (j0 - (i0 + δ)/ρ)
 end
 
 end # module

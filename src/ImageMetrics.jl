@@ -1,10 +1,12 @@
 module ImageMetrics
 
 export
-    interpolate, interpolate!
+    interpolate, interpolate!,
+    resample
 
-# Write your package code here.
+using Unitless, TypeUtils
+
 include("interpolation.jl")
-import .Interpolation: interpolate, interpolate!
+import .Interpolation: resample, interpolate, interpolate!
 
 end
