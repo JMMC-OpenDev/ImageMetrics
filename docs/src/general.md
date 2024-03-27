@@ -1,4 +1,4 @@
-# Image Metrics
+# General image metrics
 
 A general discussion about measuring discrepancy between images with a specific
 focus on optical interferometry is developed in[^Gomes2016]. A proper image
