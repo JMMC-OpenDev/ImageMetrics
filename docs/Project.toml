@@ -1,0 +1,7 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+ImageMetrics = "e44d391e-a7e5-42ec-b9f3-86d50a5c9be9"
+
+[compat]
+Documenter = "1.2"
+julia = "1"
