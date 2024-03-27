@@ -5,6 +5,9 @@ export interpolate, interpolate!, resample
 using TypeUtils, Unitless
 import Base: axes1
 
+# A colon means no interpolation, otherwise a vector of coordinates.
+const InterpolationCoordinates = Union{Colon,AbstractVector{<:Real}}
+
 """
     interpolate(A, x...) -> B
 
@@ -15,27 +18,19 @@ coordinates along the corresponding dimension of `A` or a colon `:` to not
 interpolate this dimension. The trailing colons may be omitted.
 
 """
-function interpolate(A::AbstractArray,
-                     x::Union{Colon,AbstractVector{<:Real}}...)
-    return interpolate(A, Val(1), x...)
+function interpolate(A::AbstractArray, xs::InterpolationCoordinates...)
+    # Interpolation is separable, start with the 1st dimension.
+    return interpolate(A, Val(1), xs...)
 end
 
-function interpolate(A::AbstractArray,
-                     ::Val{d},
-                     x::Colon,
-                     xs::Union{Colon,AbstractVector{<:Real}}...) where {d}
-    return interpolate(A, Val(d+1), xs...)
-end
-
-function interpolate(A::AbstractArray,
-                     ::Val{d},
-                     x::AbstractVector{<:Real},
-                     xs::Union{Colon,AbstractVector{<:Real}}...) where {d}
+function interpolate(A::AbstractArray, ::Val{d}, x::InterpolationCoordinates,
+                     xs::InterpolationCoordinates...) where {d}
+    # Interpolate along d-th dimension, then proceed with the next dimension.
     return interpolate(interpolate(A, Val(d), x), Val(d+1), xs...)
 end
 
-function interpolate(A::AbstractArray,
-                     ::Val{d}) where {d}
+function interpolate(A::AbstractArray, ::Val{d}) where {d}
+    # All dimensions have been interpolated, return the result.
     return A
 end
 
@@ -75,24 +70,20 @@ Coordinates `x` may also be a colon `:` to skip interpolating `d`-th dimension:
 See also [`interpolate!`](@ref).
 
 """
-function interpolate(A::AbstractArray{<:Any,N},
-                     ::Val{d},
-                     x::Colon) where {N,d}
+function interpolate(A::AbstractArray{<:Any,N}, ::Val{d},
+                     x::InterpolationCoordinates) where {N,d}
     1 ≤ d ≤ N || throw(out_of_range_dimension)
-    return A
+    if x isa Colon
+        # No interpolation along this dimension.
+        return A
+    else
+        T = float(eltype(A))
+        A_inds = axes(A)
+        B_inds = ntuple(i -> (i == d ? axes1(x) : A_inds[i]), Val(N))
+        B = similar(A, T, B_inds)
+        return interpolate!(B, A, Val(d), x)
+    end
 end
-
-function interpolate(A::AbstractArray{<:Any,N},
-                     ::Val{d},
-                     x::AbstractVector{<:Real}) where {N,d}
-    1 ≤ d ≤ N || throw(out_of_range_dimension)
-    T = float(eltype(A))
-    A_inds = axes(A)
-    B_inds = ntuple(i -> (i == d ? axes1(x) : A_inds[i]), Val(N))
-    B = similar(A, T, B_inds)
-    return interpolate!(B, A, Val(d), x)
-end
-
 
 """
     interpolate!(B, A, Val(d), x) -> B
