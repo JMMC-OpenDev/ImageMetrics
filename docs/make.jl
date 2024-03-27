@@ -40,6 +40,6 @@ makedocs(
 
 if DEPLOYDOCS
     deploydocs(
-        repo = "https://github.com/JMMC-OpenDev/ImageMetrics",
+        repo = "github.com/JMMC-OpenDev/ImageMetrics",
     )
 end
