@@ -10,6 +10,8 @@ Unitless = "c904d999-9673-4878-a3dd-e3ef1851788a"
 
 [compat]
 TypeUtils = "0.3"
+Unitless = "2"
+ArrayTools = "0.3"
 julia = "1.5"
 
 [extras]
