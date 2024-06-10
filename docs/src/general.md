@@ -19,7 +19,7 @@ reference image, and ``\Vx``, a reconstructed image, is given by:
 
 ```math
 \begin{align}
-\Dist(\Vx,\Vy) = \min_{α,β,\boldsymbol{θ}} \Bigl\{
+\Dist(\Vx,\Vy) = \min_{α,β,\Vt} \Bigl\{
   &\sum_{i \in |\MR_{\boldsymbol{θ}}\cdot\Vx| \cap |\Vy|}
   d\!\left(α\,(\MR_{\boldsymbol{θ}}\cdot\Vx)_i + β, y_i\right)
   \notag\\
@@ -36,9 +36,12 @@ reference image, and ``\Vx``, a reconstructed image, is given by:
 
 where ``d(x,y)`` is some pixel-wise distance, ``\MR_{\boldsymbol{θ}}`` is a linear
 operator which implements resampling with a given magnification, translation, and
-blurring, and ``v_{\mathrm{out}}`` is the assumed out-of-field pixel value. Here
-``\alpha``, ``\beta``, and ``\boldsymbol{θ}`` are nuisance parameters to reduce the
-mismatch between the images.
+blurring, and ``v_{\mathrm{out}}`` is the assumed out-of-field pixel value.
+``\boldsymbol{θ}`` accounts for all parameters defining the operator
+``\MR_{\boldsymbol{θ}}``, in particular the translation ``\Vt``, and ``|\Vy|`` denotes the
+list of pixels of the image ``\Vy``. Here ``\alpha \in \mathbb{R}``, ``\beta \in
+\mathbb{R}``, and the translation ``\Vt \in \mathbb{R}^2`` are nuisance parameters to
+reduce the mismatch between the images.
 
 The score may be defined by normalizing the distance:
 
@@ -47,8 +50,8 @@ The score may be defined by normalizing the distance:
 = \frac{\Dist(\Vx,\Vy)}{\Dist(v_{\mathrm{out}}\,\One,\Vy)}
 ```
 
-where ``\One`` is an image of the same size as ``\Vy`` but filled with ones,
-hence``v_{\mathrm{out}}\,\One`` is an image of the same size as ``\Vy`` but filled with
+where ``\One`` is an image of the same size as ``\Vy`` but filled with ones, hence
+``v_{\mathrm{out}}\,\One`` is an image of the same size as ``\Vy`` but filled with
 ``v_{\mathrm{out}}`` the assumed out-of-field pixel value.
 
 The following properties are assumed for the pixel-wise distance:
