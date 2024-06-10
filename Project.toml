@@ -5,6 +5,7 @@ version = "0.1.0"
 
 [deps]
 ArrayTools = "1dc0ca97-c5ce-4e77-ac6d-c576ac9d7f27"
+EasyRanges = "bd0ea217-0861-4661-bed1-3e8ea598dd25"
 TypeUtils = "c3b1956e-8857-4d84-9b79-890df85b1e67"
 
 [compat]

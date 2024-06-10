@@ -40,8 +40,39 @@ function distance(x::AbstractArray,
     @assert_same_axes x y
     α, β, Γ, Ψ = scale, bias, enhancement, cost
     dist = zero(Ψ(Γ(α*zero(eltype(x)) + β) - Γ(zero(eltype(y)))))
-    @inbounds @simd for i in eachindex(x, y)
-        dist += Ψ(Γ(α*x[i] + β), Γ(y[i]))
+    if axes(x) == axes(y)
+        @inbounds @simd for i in eachindex(x, y)
+            dist += Ψ(Γ(α*x[i] + β), Γ(y[i]))
+        end
+    else
+        X = CartesianIndices(x)
+        Y = CartesianIndices(y)
+        Γz = Γ(β)
+        # Distance of background w.r.t. `x`.
+        let dx = zero(dist)
+            @inbounds @simd for i in X
+                Γx = Γ(α*x[i] + β)
+                dx += Ψ(Γx, Γz)
+            end
+            dist += dx
+        end
+        # Distance of background w.r.t. `y`.
+        let dy = zero(dist)
+            @inbounds @simd for i in Y
+                Γy = Γ(y[i])
+                dy += Ψ(Γz, Γy)
+            end
+            dist += dy
+        end
+        # Distance of `x` w.r.t. `y` in common part minus respective distance to background.
+        let dxy = zero(dist)
+            @inbounds @simd for i in @range X ∩ Y
+                Γx = Γ(α*x[i] + β)
+                Γy = Γ(y[i])
+                dxy += Ψ(Γx, Γy) - (Ψ(Γx, Γz) + Ψ(Γz, Γy))
+            end
+            dist += dxy
+        end
     end
     return dist
 end
