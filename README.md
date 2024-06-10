@@ -9,7 +9,7 @@
 This repository collects notes and tools for image metrics to quantitatively
 compare images.
 
-The formalism is developed in the [documentation](doc-dev-url).
+The formalism is developed in the [documentation][doc-dev-url].
 
 [doc-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [doc-stable-url]: https://JMMC-OpenDev.github.io/ImageMetrics/stable
