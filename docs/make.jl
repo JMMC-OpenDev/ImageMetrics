@@ -10,7 +10,7 @@ DEPLOYDOCS = (get(ENV, "CI", nothing) == "true")
 makedocs(
     sitename = "Image Metrics",
     authors = "Éric Thiébaut and contributors",
-    pages = ["index.md", "general.md", "bc2016.md"],
+    pages = ["index.md", "general.md", "bc2016.md", "ic2024.md"],
     format = Documenter.HTML(
         prettyurls = DEPLOYDOCS,
         mathengine = Documenter.KaTeX(
