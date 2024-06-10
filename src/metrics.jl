@@ -10,23 +10,25 @@ struct GammaCorrection{T<:Real}
 end
 (f::GammaCorrection)(x::Real) = sign(x)*abs(x)^f.exponent
 
+absdif(x, y) = abs(x - y)
+abs2dif(x, y) = abs2(x - y)
+
 """
     ImageMetrics.distance(x, y; kwds...) -> dist
 
-yields the image distance between a restored image `x` and a reference image
-`y` computed as:
+yields the image distance between a restored image `x` and a reference image `y` computed
+as:
 
-    dist = Σᵢ Ψ(Γ(α⋅x[i] + β) - Γ(y[i]))
+    dist = Σᵢ Ψ(Γ(α⋅x[i] + β), Γ(y[i]))
 
-where the parameters `α` and `β` and functions `Γ` and `Ψ` are specified by
-keywords:
+where the parameters `α` and `β` and functions `Γ` and `Ψ` are specified by keywords:
 
 | Keyword         | Symbol | Default    | Description            |
 |:----------------|:-------|:-----------|:-----------------------|
 | `scale`         | `α`    | `1`        | Brightness scale       |
 | `bias`          | `β`    | `0`        | Brightness bias        |
 | `enhancement`   | `Γ`    | `identity` | Brightness enhancement |
-| `cost`          | `Ψ`    | `abs`      | Pixelwise cost         |
+| `cost`          | `Ψ`    | `absdif`   | Pixelwise cost         |
 
 """
 function distance(x::AbstractArray,
@@ -39,7 +41,7 @@ function distance(x::AbstractArray,
     α, β, Γ, Ψ = scale, bias, enhancement, cost
     dist = zero(Ψ(Γ(α*zero(eltype(x)) + β) - Γ(zero(eltype(y)))))
     @inbounds @simd for i in eachindex(x, y)
-        dist += Ψ(Γ(α*x[i] + β) - Γ(y[i]))
+        dist += Ψ(Γ(α*x[i] + β), Γ(y[i]))
     end
     return dist
 end
