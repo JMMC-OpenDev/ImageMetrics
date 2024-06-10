@@ -31,15 +31,19 @@ where the parameters `α` and `β` and functions `Γ` and `Ψ` are specified by 
 | `cost`          | `Ψ`    | `absdif`   | Pixelwise cost         |
 
 """
-function distance(x::AbstractArray,
-                  y::AbstractArray;
+function distance(x::AbstractArray{Tx,N},
+                  y::AbstractArray{Ty,N};
                   enhancement::Function = identity,
                   cost::Function = abs,
-                  scale::Real = one(real(typeof(x))),
-                  bias::Real = zero(real(typeof(x))))
-    @assert_same_axes x y
-    α, β, Γ, Ψ = scale, bias, enhancement, cost
-    dist = zero(Ψ(Γ(α*zero(eltype(x)) + β) - Γ(zero(eltype(y)))))
+                  scale::Real = one(real(Tx)),
+                  bias::Real = zero(real(Tx))) where {Tx,Ty,N}
+    # Convert floating-point type of α and β whitout changing units if any.
+    T = floating_point_type(Tx, Ty) # floating-point type for computations
+    α = convert_floating_point_type(T, scale)
+    β = convert_floating_point_type(T, bias)
+    Γ = enhancement
+    Ψ = cost
+    dist = zero(Ψ(Γ(zero(β)), Γ(zero(β))))
     if axes(x) == axes(y)
         @inbounds @simd for i in eachindex(x, y)
             dist += Ψ(Γ(α*x[i] + β), Γ(y[i]))
@@ -67,8 +71,7 @@ function distance(x::AbstractArray,
         # Distance of `x` w.r.t. `y` in common part minus respective distance to background.
         let dxy = zero(dist)
             @inbounds @simd for i in @range X ∩ Y
-                Γx = Γ(α*x[i] + β)
-                Γy = Γ(y[i])
+                Γx, Γy = promote(Γ(α*x[i] + β), Γ(y[i]))
                 dxy += Ψ(Γx, Γy) - (Ψ(Γx, Γz) + Ψ(Γz, Γy))
             end
             dist += dxy
