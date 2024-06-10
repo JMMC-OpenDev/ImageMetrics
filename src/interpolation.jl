@@ -2,7 +2,7 @@ module Interpolation
 
 export interpolate, interpolate!, resample
 
-using TypeUtils, Unitless
+using TypeUtils
 import Base: axes1
 
 # A colon means no interpolation, otherwise a vector of coordinates.

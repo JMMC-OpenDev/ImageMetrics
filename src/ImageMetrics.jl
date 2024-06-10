@@ -4,7 +4,7 @@ export
     interpolate, interpolate!,
     resample
 
-using Unitless, TypeUtils, ArrayTools
+using TypeUtils, ArrayTools
 
 include("utils.jl")
 include("metrics.jl")
