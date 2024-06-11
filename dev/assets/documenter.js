@@ -59,16 +59,19 @@ $(document).ready(function() {
     }
   ],
   "macros": {
-    "\\Vt": "\\boldsymbol{t}",
+    "\\Vt": "\\boldsymbol{\\delta}",
+    "\\Sign": "\\mathrm{sgn}",
     "\\Vx": "\\boldsymbol{x}",
     "\\RR": "\\mathbb{R}",
     "\\Zero": "\\boldsymbol{0}",
+    "\\Params": "\\boldsymbol{\\xi}",
     "\\Vy": "\\boldsymbol{y}",
     "\\Vz": "\\boldsymbol{z}",
     "\\MR": "\\mathbf{R}",
     "\\Dist": "\\mathcal{D}",
     "\\Score": "\\mathcal{S}",
     "\\One": "\\boldsymbol{1}",
+    "\\Vtheta": "\\boldsymbol{\\theta}",
     "\\Vh": "\\boldsymbol{h}"
   }
 }
