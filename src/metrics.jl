@@ -10,8 +10,21 @@ struct GammaCorrection{T<:Real}
 end
 (f::GammaCorrection)(x::Real) = sign(x)*abs(x)^f.exponent
 
-absdif(x, y) = abs(x - y)
-abs2dif(x, y) = abs2(x - y)
+"""
+    ImageMetrics.absdif(x, y) -> abs(x - y)
+
+yields the absolute difference between `x` and `y`.
+
+"""
+absdif(x::Number, y::Number) = abs(x - y)
+
+"""
+    ImageMetrics.abs2dif(x, y) -> abs2(x - y)
+
+yields the squared absolute difference between `x` and `y`.
+
+"""
+abs2dif(x::Number, y::Number) = abs2(x - y)
 
 """
     ImageMetrics.distance(x, y; kwds...) -> dist
