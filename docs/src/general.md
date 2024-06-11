@@ -20,16 +20,16 @@ reference image, and ``\Vx``, a reconstructed image, is given by:
 ```math
 \begin{align*}
 \Dist(\Vx,\Vy) = \min_{\Params} \Bigl\{
-  &\sum_{i \in |\MR_{\Vtheta}\cdot\Vx| \cap |\Vy|}
-  d\!\left(α\,(\MR_{\Vtheta}\cdot\Vx)_i + β, y_i\right)
+  &\sum_{j \in |\MR_{\Vtheta}\cdot\Vx| \cap |\Vy|}
+  d\!\left(α\,(\MR_{\Vtheta}\cdot\Vx)_j + β, y_j\right)
   \notag\\
-  &+ \sum_{i \in |\MR_{\Vtheta}\cdot\Vx| \backslash
+  &+ \sum_{j \in |\MR_{\Vtheta}\cdot\Vx| \backslash
   (|\MR_{\Vtheta}\cdot\Vx| \cap |\Vy|)}
-  d\!\left(α\,(\MR_{\Vtheta}\cdot\Vx)_i + β, \eta\right)
+  d\!\left(α\,(\MR_{\Vtheta}\cdot\Vx)_j + β, \eta\right)
   \notag\\
-  &+ \sum_{i \in |\Vy| \backslash
+  &+ \sum_{j \in |\Vy| \backslash
   (|\MR_{\Vtheta}\cdot\Vx| \cap |\Vy|)}
-  d\!\left(\eta,y_i\right)
+  d\!\left(\eta,y_j\right)
 \Bigr\}
 \end{align*}
 ```
@@ -48,22 +48,54 @@ settings while ``\alpha \in \mathbb{R}`` and the translation ``\Vt \in \mathbb{R
 be adjusted to reduce the mismatch between the images. Hence, ``\Params = \{\alpha,\Vt\}``
 in this context.
 
-The score may be defined by normalizing the distance:
+A score may be defined by normalizing the distance and such that the higher the score, the
+better the restored image ``\Vx``:
 
 ```math
-\Score(\Vx) = \frac{\Dist(\Vx,\Vy)}{\Dist(\eta\,\One,\Vy)}
+\Score(\Vx) = 1 - \frac{\Dist(\Vx,\Vy)}{\Dist(\eta\,\One,\Vy)}
 ```
 
 where ``\One`` is an image of the same size as ``\Vy`` but filled with ones, hence
-``\eta\,\One`` is an image of the same size as ``\Vy`` but filled with ``\eta`` the
-assumed out-of-field pixel value.
+``\eta\,\One`` is an image of the same size as ``\Vy`` but filled with ``\eta``, the
+assumed out-of-field pixel value. The score may be negative but the maximal score is 1.
 
-The following properties are assumed for the pixel-wise distance:
+Denoting by ``\mathbb{K}`` the set of possible pixel values, the following properties must
+hold for the pixel-wise distance:
 
-1. ``d(x,x) = 0`` for any ``x \in \mathbb{R}``;
-2. ``d(x,y) > 0`` for any ``(x,y) \in \mathbb{R}^2`` such that ``x \not= y``;
-3. ``d(y,x) = d(y,x)`` for any ``(x,y) \in \mathbb{R}^2``.
+1. ``d(x,x) = 0`` for any ``x \in \mathbb{K}``;
+2. ``d(x,y) > 0`` for any ``(x,y) \in \mathbb{K}^2`` such that ``x \not= y``;
+3. ``d(y,x) = d(y,x)`` for any ``(x,y) \in \mathbb{K}^2``.
 
+To remain general, a possible pixel-wise distance for which the above properties hold is
+given by:
+
+```math
+d(x, y) = \left|\Gamma(x) - \Gamma(y)\right|^p
+```
+
+where the exponent ``p`` and the function ``\Gamma: \mathbb{K}\to\mathbb{R}`` are
+introduced to make the distance more flexible. ``\Gamma`` is a _brightness correction_
+monotonic function to emphasize the interesting parts of the images amd ``p > 0`` to have
+a non-decreasing distance with respect to the absolute value of the difference
+``\Gamma(x) - \Gamma(y)``. For example:
+
+``` math
+\Gamma(x) = \Sign(x)\,|x|^\gamma,
+```
+
+where ``\Sign(x)`` is the sign of ``x``:
+
+``` math
+\Sign(x) = \begin{cases}
+-1 & \text{if $x < 0$}\\
++1 & \text{if $x > 0$}\\
+\phantom{+}0 & \text{if $x = 0$}\\
+\end{cases}
+```
+
+Metric parameters ``p`` and ``\gamma`` can be chosen depending on the context. According
+to a human panel[^Gomes2016], ``p = 1`` with ``\gamma = 1`` best reflect the human
+perception of image quality.
 
 [^Gomes2016]:
     > N. Gomes, P. J. V. Garcia & É. Thiébaut, *Assessing the quality of

@@ -29,6 +29,7 @@ makedocs(
                                 raw"\Params" => raw"\boldsymbol{\xi}",
                                 raw"\Dist" => raw"\mathcal{D}",
                                 raw"\Score" => raw"\mathcal{S}",
+                                raw"\Sign" => raw"\mathrm{sgn}",
                                 raw"\RR" => raw"\mathbb{R}",
                                 raw"\MR" => raw"\mathbf{R}",
                                 raw"\One" => raw"\boldsymbol{1}",
