@@ -18,41 +18,45 @@ Accounting for all these remarks, a possible definition of the distance between 
 reference image, and ``\Vx``, a reconstructed image, is given by:
 
 ```math
-\begin{align}
-\Dist(\Vx,\Vy) = \min_{α,β,\Vt} \Bigl\{
-  &\sum_{i \in |\MR_{\boldsymbol{θ}}\cdot\Vx| \cap |\Vy|}
-  d\!\left(α\,(\MR_{\boldsymbol{θ}}\cdot\Vx)_i + β, y_i\right)
+\begin{align*}
+\Dist(\Vx,\Vy) = \min_{\Params} \Bigl\{
+  &\sum_{i \in |\MR_{\Vtheta}\cdot\Vx| \cap |\Vy|}
+  d\!\left(α\,(\MR_{\Vtheta}\cdot\Vx)_i + β, y_i\right)
   \notag\\
-  &+ \sum_{i \in |\MR_{\boldsymbol{θ}}\cdot\Vx| \backslash
-  (|\MR_{\boldsymbol{θ}}\cdot\Vx| \cap |\Vy|)}
-  d\!\left(α\,(\MR_{\boldsymbol{θ}}\cdot\Vx)_i + β, v_{\mathrm{out}}\right)
+  &+ \sum_{i \in |\MR_{\Vtheta}\cdot\Vx| \backslash
+  (|\MR_{\Vtheta}\cdot\Vx| \cap |\Vy|)}
+  d\!\left(α\,(\MR_{\Vtheta}\cdot\Vx)_i + β, \eta\right)
   \notag\\
   &+ \sum_{i \in |\Vy| \backslash
-  (|\MR_{\boldsymbol{θ}}\cdot\Vx| \cap |\Vy|)}
-  d\!\left(v_{\mathrm{out}},y_i\right)
+  (|\MR_{\Vtheta}\cdot\Vx| \cap |\Vy|)}
+  d\!\left(\eta,y_i\right)
 \Bigr\}
-\end{align}
+\end{align*}
 ```
 
-where ``d(x,y)`` is some pixel-wise distance, ``\MR_{\boldsymbol{θ}}`` is a linear
-operator which implements resampling with a given magnification, translation, and
-blurring, and ``v_{\mathrm{out}}`` is the assumed out-of-field pixel value.
-``\boldsymbol{θ}`` accounts for all parameters defining the operator
-``\MR_{\boldsymbol{θ}}``, in particular the translation ``\Vt``, and ``|\Vy|`` denotes the
-list of pixels of the image ``\Vy``. Here ``\alpha \in \mathbb{R}``, ``\beta \in
-\mathbb{R}``, and the translation ``\Vt \in \mathbb{R}^2`` are nuisance parameters to
-reduce the mismatch between the images.
+where ``d(x,y)`` is some pixel-wise distance, ``\MR_{\Vtheta}`` is a linear operator which
+implements resampling with a given magnification, translation, and blurring, and ``\eta``
+is the assumed out-of-field pixel value. ``|\Vy|`` denotes the list of pixels of the image
+``\Vy`` and ``\Vtheta = \{\rho,\Vt,\omega\}`` accounts for all parameters defining the
+operator ``\MR_{\Vtheta}``: the magnification ``\rho``, the translation ``\Vt``, and the
+blur width ``\omega``.
+
+The distance is minimized in the set ``\Params`` of parameters which are irrelevant for
+judging of the image quality. These parameters depend on the context. For image
+reconstruction from interferometric data, ``\beta = 0`` and ``\eta = 0`` are natural
+settings while ``\alpha \in \mathbb{R}`` and the translation ``\Vt \in \mathbb{R}^2`` must
+be adjusted to reduce the mismatch between the images. Hence, ``\Params = \{\alpha,\Vt\}``
+in this context.
 
 The score may be defined by normalizing the distance:
 
 ```math
-\Score(\Vx)
-= \frac{\Dist(\Vx,\Vy)}{\Dist(v_{\mathrm{out}}\,\One,\Vy)}
+\Score(\Vx) = \frac{\Dist(\Vx,\Vy)}{\Dist(\eta\,\One,\Vy)}
 ```
 
 where ``\One`` is an image of the same size as ``\Vy`` but filled with ones, hence
-``v_{\mathrm{out}}\,\One`` is an image of the same size as ``\Vy`` but filled with
-``v_{\mathrm{out}}`` the assumed out-of-field pixel value.
+``\eta\,\One`` is an image of the same size as ``\Vy`` but filled with ``\eta`` the
+assumed out-of-field pixel value.
 
 The following properties are assumed for the pixel-wise distance:
 

@@ -21,29 +21,34 @@ as:
 
     dist = Σᵢ Ψ(Γ(α⋅x[i] + β), Γ(y[i]))
 
-where the parameters `α` and `β` and functions `Γ` and `Ψ` are specified by keywords:
+for pixels `i` in the common region of `x` and `y` and where the parameters `α` and `β`
+and functions `Γ` and `Ψ` are specified by keywords:
 
-| Keyword         | Symbol | Default    | Description            |
-|:----------------|:-------|:-----------|:-----------------------|
-| `scale`         | `α`    | `1`        | Brightness scale       |
-| `bias`          | `β`    | `0`        | Brightness bias        |
-| `enhancement`   | `Γ`    | `identity` | Brightness enhancement |
-| `cost`          | `Ψ`    | `absdif`   | Pixelwise cost         |
+| Keyword         | Symbol | Default                 | Description                  |
+|:----------------|:-------|:------------------------|:-----------------------------|
+| `scale`         | `α`    | `one(real(eltype(x)))`  | Brightness scale             |
+| `bias`          | `β`    | `zero(real(eltype(x)))` | Brightness bias              |
+| `out`           | `η`    | `zero(real(eltype(y)))` | Value of out-of-field pixels |
+| `enhancement`   | `Γ`    | `identity`              | Brightness enhancement       |
+| `cost`          | `Ψ`    | `absdif`                | Pixelwise cost               |
 
 """
 function distance(x::AbstractArray{Tx,N},
                   y::AbstractArray{Ty,N};
                   enhancement::Function = identity,
                   cost::Function = abs,
-                  scale::Real = one(real(Tx)),
-                  bias::Real = zero(real(Tx))) where {Tx,Ty,N}
-    # Convert floating-point type of α and β whitout changing units if any.
+                  scale::Number = one(real(Tx)),
+                  bias::Number = zero(real(Tx)),
+                  out::Number = zero(real(Ty))) where {Tx,Ty,N}
+    # Convert floating-point type of α, β, and η whitout changing their units if any.
     T = floating_point_type(Tx, Ty) # floating-point type for computations
     α = convert_floating_point_type(T, scale)
     β = convert_floating_point_type(T, bias)
+    η = convert_floating_point_type(T, out)
     Γ = enhancement
     Ψ = cost
-    dist = zero(Ψ(Γ(zero(β)), Γ(zero(β))))
+    Γz = Γ(η)
+    dist = zero(Ψ(Γz, Γz))
     if axes(x) == axes(y)
         @inbounds @simd for i in eachindex(x, y)
             dist += Ψ(Γ(α*x[i] + β), Γ(y[i]))
@@ -51,7 +56,6 @@ function distance(x::AbstractArray{Tx,N},
     else
         X = CartesianIndices(x)
         Y = CartesianIndices(y)
-        Γz = Γ(β)
         # Distance of background w.r.t. `x`.
         let dx = zero(dist)
             @inbounds @simd for i in X
