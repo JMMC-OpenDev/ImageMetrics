@@ -9,6 +9,7 @@ export
     interpolate, interpolate!,
     map_with_offsets, map_with_offsets!,
     resample,
+    resample_slices,
     slice,
     slice_eltype,
     slice_ndims,

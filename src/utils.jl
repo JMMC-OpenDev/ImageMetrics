@@ -64,6 +64,63 @@ slice_eltype(::Type{<:AbstractVector{<:AbstractArray{T,N}}}) where {T,N} = T
 slice_eltype(::Type{<:AbstractArray{T,N}}) where {T,N} = T
 
 """
+    resample_slices(input, from => to)
+
+resamples slices of `input` array. `from` and `to` are the slice coordinates in the
+input and output respectively. The result is always a vector of resampled slices.
+
+"""
+function resample_slices(input::AbstractArray,
+                         from_to::Pair{<:AbstractVector{<:Number},<:AbstractVector{<:Number}})
+
+    # Extract wavelengths and check compatibility with input cube.
+    input_coords, output_coords = from_to
+    slice_range(input) == axes(input_coords, 1) || throw(DimensionMismatch(
+        "incompatible index ranges for input spectral channels and image sequence"))
+
+    # Create a vector of output images.
+    T = float(slice_eltype(input))
+    N = slice_ndims(input)
+    output = Vector{Array{T,N}}(undef, length(output_coords))
+
+    # Interpolate to the same spectral channels.
+    xmin, jmin = findmin(input_coords)
+    xmax, jmax = findmax(input_coords)
+    for (k, x) in enumerate(output_coords)
+        if x ≤ xmin
+            # Out of range, apply nearest neighbor boundary condition.
+            output[k] = slice(input, :, :, jmin)
+        elseif x ≥ xmax
+            # Out of range, apply nearest neighbor boundary condition.
+            output[k] = slice(input, :, :, jmax)
+        else
+            # In range, interpolate between the two nearest neighbors (one less or equal,
+            # the other strictly greater).
+            F = floating_point_type(T)
+            x0, j0 = xmin, jmin
+            x1, j1 = xmax, jmax
+            for j in eachindex(input_coords)
+                xj = input_coords[j]
+                if xj ≤ x && abs(x - xj) < abs(x - x0)
+                    j0, x0 = j, xj
+                elseif xj > x && abs(x - xj) < abs(x - x1)
+                    j1, x1 = j, xj
+                end
+            end
+            if x0 < x1
+                # Interpolate.
+                w0 = as(F, (x - x1)/(x0 - x1))
+                w1 = as(F, (x0 - x)/(x0 - x1))
+                output[k] = w0.*slice(input, j0) .+ w1.*slice(input, j1)
+            else
+                output[k] = slice(input, j0)
+            end
+        end
+    end
+    return output
+end
+
+"""
     map_with_offsets(f, A, B, inds...; A_pad=zero(eltype(A)), B_pad=zero(eltype(B))) -> C
 
 yields an array `C` with axes `inds...` such that:
