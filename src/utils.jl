@@ -17,6 +17,53 @@ abs2dif(x::T, y::T) where {T<:Number} = abs2(x - y)
 abs2dif(x::Number, y::Number) = abs2dif(promote(x, y)...)
 
 """
+    slice(A, i) -> A_i
+
+yields the `i`-th slice of array `A`. If `A` is a vector of arrays, the result is `A[i]`;
+otherwise, the result is `view(A, :..., i)` where `:...` denotes as many colons as the
+number of dimensions of `A` minus one.
+
+"""
+slice(A::AbstractVector{<:AbstractArray}, i::Integer) = A[i]
+@generated slice(A::AbstractArray{<:Any,N}, i::Integer)  where {N} =
+    quote
+        view(A, $(ntuple(_ -> Colon(), Val(N - 1))...), i)
+    end
+
+"""
+    slice_range(A) -> r
+
+yields the range of slice indices for array `A`.
+
+"""
+slice_range(A::AbstractVector{<:AbstractArray}) = axes(A, 1)
+slice_range(A::AbstractArray{<:Any,N}) where {N} = axes(A, N - 1)
+
+"""
+    slice_ndims(A) -> N
+
+yields the number of dimensions in a slice of array `A`. Note that the result only depends
+on the type of `A`; as a matter of fact, argument can simply be the type of the array to
+be sliced.
+
+"""
+slice_ndims(A::AbstractArray) = slice_ndims(typeof(A))
+slice_ndims(::Type{<:AbstractVector{<:AbstractArray{T,N}}}) where {T,N} = N
+slice_ndims(::Type{<:AbstractArray{T,N}}) where {T,N} = N - 1
+
+"""
+    slice_eltype(A) -> T
+
+yields the element type in a slice of array `A`. Note that the result only depends on the
+type of `A`; as a matter of fact, argument can simply be the type of the array to be
+sliced.
+
+"""
+slice_eltype(A::AbstractArray) = slice_eltype(typeof(A))
+slice_eltype(::Type{<:AbstractVector{<:AbstractArray{T,N}}}) where {T,N} = T
+slice_eltype(::Type{<:AbstractArray{T,N}}) where {T,N} = T
+
+"""
     map_with_offsets(f, A, B, inds...; A_pad=zero(eltype(A)), B_pad=zero(eltype(B))) -> C
 
 yields an array `C` with axes `inds...` such that:
