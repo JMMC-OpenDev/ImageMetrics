@@ -1,4 +1,22 @@
 """
+    absdif(x, y) -> abs(x - y)
+
+yields the absolute difference between `x` and `y`.
+
+"""
+absdif(x::T, y::T) where {T<:Number} = abs(x - y)
+absdif(x::Number, y::Number) = absdif(promote(x, y)...)
+
+"""
+    abs2dif(x, y) -> abs2(x - y)
+
+yields the squared absolute difference between `x` and `y`.
+
+"""
+abs2dif(x::T, y::T) where {T<:Number} = abs2(x - y)
+abs2dif(x::Number, y::Number) = abs2dif(promote(x, y)...)
+
+"""
     map_with_offsets(f, A, B, inds...; A_pad=zero(eltype(A)), B_pad=zero(eltype(B))) -> C
 
 yields an array `C` with axes `inds...` such that:
