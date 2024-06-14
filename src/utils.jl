@@ -74,6 +74,37 @@ function crop!(dst::AbstractArray{<:Any,N}, src::AbstractArray{<:Any,N}) where {
 end
 
 """
+    B = autocrop([f = !iszero,] A)
+
+crops array `A` to keep the smallest Cartesian region containing all entries of `A` such
+that `f(A[i])` is true.
+
+"""
+autocrop(A::AbstractArray) = A[bounding_box(A)]
+autocrop(f, A::AbstractArray) = A[bounding_box(f, A)]
+
+"""
+    B = bounding_box([f = !iszero,] A)
+
+yields the smallest Cartesian region containing all entries of `A` such that `f(A[i])` is
+true.
+
+"""
+bounding_box(A::AbstractArray{Bool}) = bounding_box(identity, A)
+bounding_box(A::AbstractArray) = bounding_box(!iszero, A)
+function bounding_box(f, A::AbstractArray{<:Any,N}) where {N}
+    Imin = CartesianIndex(ntuple(d -> typemax(Int), Val(N)))
+    Imax = CartesianIndex(ntuple(d -> typemin(Int), Val(N)))
+    @inbounds for I in CartesianIndices(A)
+        if f(A[I])
+            Imin = min(Imin, I)
+            Imax = max(Imax, I)
+        end
+    end
+    return Imin:Imax
+end
+
+"""
     paste!(dst, src; offs, pad) -> dst
 
 paste values of source array `src` into destination array `dst` with offsets `offs` and
