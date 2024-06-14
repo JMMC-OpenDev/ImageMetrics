@@ -1,7 +1,7 @@
 """
     zerofill!(A) -> A
 
-zero-fills array `A` and returns it.
+fills array `A` with zeros and returns `A`.
 
 """
 zerofill!(A::AbstractArray) = fill!(A, zero(eltype(A)))
@@ -9,8 +9,8 @@ zerofill!(A::AbstractArray) = fill!(A, zero(eltype(A)))
 """
     zeropad(A, args...) -> B
 
-zero-pads array `A` to dimensions or axes `args...`. The geometric centers (in
-the same sense as for `fftshift`) of `A` and `B` are coincident.
+zero-pads array `A` to dimensions or axes `args...`. The geometric centers (in the same
+sense as for `fftshift`) of `A` and `B` are coincident.
 
 """
 zeropad(A::AbstractArray, args::Integer...) = zeropad(A, args)
@@ -24,20 +24,18 @@ end
 """
     zeropad!(dst, src) -> dst
 
-overwrites destination `dst` with source `src` with zero-padding. The geometric
-centers (in the same sense as for `fftshift`) of `dst` and `src` are
-coincident.
+overwrites destination `dst` with source `src` with zero-padding. The geometric centers
+(in the same sense as for `fftshift`) of `dst` and `src` are coincident.
 
 """
 function zeropad!(dst::AbstractArray{<:Any,N}, src::AbstractArray{<:Any,N}) where {N}
     I = axes(src)
     J = axes(dst)
-    flag = true
     for d in 1:N
-        flag &= (length(I[d]) ≤ length(J[d]))
+        length(I[d]) ≤ length(J[d]) || error(
+            "destination dimensions must not be smaller than source dimensions for zero-padding")
     end
-    flag || error("destination dimensions must not be smaller than source dimensions for zero-padding")
-    offs = ntuple(d -> central_axis_index(J[d]) - central_axis_index(I[d]), Val(d))
+    offs = ntuple(d -> central_axis_index(J[d]) - central_axis_index(I[d]), Val(N))
     pad = zero(eltype(dst))
     return paste!(dst, src; offs, pad)
 end
@@ -45,8 +43,8 @@ end
 """
     crop(A, args...) -> B
 
-crops array `A` to dimensions or axes `args...`. The geometric centers (in the
-same sense as for `fftshift`) of `A` and `B` are coincident.
+crops array `A` to dimensions or axes `args...`. The geometric centers (in the same sense
+as for `fftshift`) of `A` and `B` are coincident.
 
 """
 crop(A::AbstractArray, args::Integer...) = crop(A, args)
@@ -60,29 +58,27 @@ end
 """
     crop!(dst, src) -> dst
 
-overwrites destination `dst` with source `src` with cropping. The geometric
-centers (in the same sense as for `fftshift`) of `dst` and `src` are
-coincident.
+overwrites destination `dst` with source `src` with cropping. The geometric centers (in
+the same sense as for `fftshift`) of `dst` and `src` are coincident.
 
 """
 function crop!(dst::AbstractArray{<:Any,N}, src::AbstractArray{<:Any,N}) where {N}
     I = axes(src)
     J = axes(dst)
-    flag = true
     for d in 1:N
-        flag &= (length(I[d]) ≥ length(J[d]))
+        length(I[d]) ≥ length(J[d]) || error(
+            "destination dimensions must not be larger than source dimensions for cropping")
     end
-    flag || error("destination dimensions must not be larger than source dimensions for cropping")
-    offs = ntuple(d -> central_axis_index(I[d]) - central_axis_index(J[d]), Val(d))
+    offs = ntuple(d -> central_axis_index(I[d]) - central_axis_index(J[d]), Val(N))
     return paste!(dst, src; offs)
 end
 
 """
     paste!(dst, src; offs, pad) -> dst
 
-paste values of source array `src` into destination array `dst` with offsets
-`offs` and padding value `pad`. By default, offsets are all equal to zero and
-the padding value is `zero(eltype(dst))`.
+paste values of source array `src` into destination array `dst` with offsets `offs` and
+padding value `pad`. By default, offsets are all equal to zero and the padding value is
+`zero(eltype(dst))`.
 
 """
 function paste!(dst::AbstractArray{<:Any,N}, src::AbstractArray{<:Any,N};
@@ -130,8 +126,8 @@ end
     ImageMetrics.central_axis_index(dim) -> i
     ImageMetrics.central_axis_index(rng) -> i
 
-yield the central index of an array axis of length `dim` or with index range
-`rng` following the same conventions as `fftshift`.
+yield the central index of an array axis of length `dim` or with index range `rng`
+following the same conventions as `fftshift`.
 
 """
 central_axis_index(dim::Integer) = div(as(Int, dim), 2) + 1
