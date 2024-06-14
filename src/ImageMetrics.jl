@@ -16,11 +16,14 @@ export
     slice_range,
     zerofill!
 
-using TypeUtils, ArrayTools, EasyRanges, OffsetArrays
+using TypeUtils, ArrayTools, EasyRanges, OffsetArrays, InterpolationKernels
 
 include("utils.jl")
 include("metrics.jl")
+include("resample.jl")
 include("interpolation.jl")
-import .Interpolation: resample, interpolate, interpolate!
+import .Interpolation: interpolate, interpolate! # NOTE: do not import `resample`
+
+include("iic2024.jl")
 
 end

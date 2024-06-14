@@ -37,7 +37,7 @@ yields the range of slice indices for array `A`.
 
 """
 slice_range(A::AbstractVector{<:AbstractArray}) = axes(A, 1)
-slice_range(A::AbstractArray{<:Any,N}) where {N} = axes(A, N - 1)
+slice_range(A::AbstractArray{<:Any,N}) where {N} = axes(A, N)
 
 """
     slice_ndims(A) -> N
@@ -76,7 +76,7 @@ function resample_slices(input::AbstractArray,
     # Extract wavelengths and check compatibility with input cube.
     input_coords, output_coords = from_to
     slice_range(input) == axes(input_coords, 1) || throw(DimensionMismatch(
-        "incompatible index ranges for input spectral channels and image sequence"))
+        "incompatible index ranges for slices and coordinates"))
 
     # Create a vector of output images.
     T = float(slice_eltype(input))
@@ -89,10 +89,10 @@ function resample_slices(input::AbstractArray,
     for (k, x) in enumerate(output_coords)
         if x ≤ xmin
             # Out of range, apply nearest neighbor boundary condition.
-            output[k] = slice(input, :, :, jmin)
+            output[k] = slice(input, jmin)
         elseif x ≥ xmax
             # Out of range, apply nearest neighbor boundary condition.
-            output[k] = slice(input, :, :, jmax)
+            output[k] = slice(input, jmax)
         else
             # In range, interpolate between the two nearest neighbors (one less or equal,
             # the other strictly greater).
