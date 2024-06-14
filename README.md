@@ -11,6 +11,12 @@ compare images.
 
 The formalism is developed in the [documentation][doc-dev-url].
 
+``` julia
+using Pkg
+Pkg.add(url="https://github.com/emmt/EasyFITS.jl")
+Pkg.add(url="https://github.com/JMMC-OpenDev/ImageMetrics")
+```
+
 [doc-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [doc-stable-url]: https://JMMC-OpenDev.github.io/ImageMetrics/stable
 
