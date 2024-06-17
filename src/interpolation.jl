@@ -1,5 +1,6 @@
 module Interpolation
 
+# NOTE: The `resample` method defined here is not used for the metric.
 export interpolate, interpolate!, resample
 
 using TypeUtils

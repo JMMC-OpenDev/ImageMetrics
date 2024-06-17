@@ -11,22 +11,6 @@ end
 (f::GammaCorrection)(x::Real) = sign(x)*abs(x)^f.exponent
 
 """
-    ImageMetrics.absdif(x, y) -> abs(x - y)
-
-yields the absolute difference between `x` and `y`.
-
-"""
-absdif(x::Number, y::Number) = abs(x - y)
-
-"""
-    ImageMetrics.abs2dif(x, y) -> abs2(x - y)
-
-yields the squared absolute difference between `x` and `y`.
-
-"""
-abs2dif(x::Number, y::Number) = abs2(x - y)
-
-"""
     ImageMetrics.distance(x, y; kwds...) -> dist
 
 yields the image distance between a restored image `x` and a reference image `y` computed

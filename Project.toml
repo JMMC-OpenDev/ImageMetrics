@@ -5,8 +5,14 @@ version = "0.1.0"
 
 [deps]
 ArrayTools = "1dc0ca97-c5ce-4e77-ac6d-c576ac9d7f27"
+EasyFITS = "a977f4a2-36a7-4172-89e7-19c2726f82e5"
 EasyRanges = "bd0ea217-0861-4661-bed1-3e8ea598dd25"
+FITSHeaders = "8163a04c-c153-4fb1-a498-3402381ec208"
+InterpolationKernels = "16730964-a2ec-11e9-36fa-47a4f82bfac6"
+LocalFilters = "085fde7c-5f94-55e4-8448-8bbb5db6dde9"
+OffsetArrays = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
 TypeUtils = "c3b1956e-8857-4d84-9b79-890df85b1e67"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
 ArrayTools = "0.3"
